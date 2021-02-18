@@ -5,7 +5,7 @@ Logux architecture was designed to be peer-to-peer and flexible. You can build d
 
 ## Connecting
 
-Logux client keeps only one WebSocket connection even if the user opens an application in multiple browser’s tabs. Logux clients in different **elect one leader** to keep the connection. If the user closes the leader tab, other tabs will re-elect a leader.
+Logux client keeps only one WebSocket connection even if the user opens an application in multiple browser’s tabs. Logux clients in different tabs **elect one leader** to keep the connection. If the user closes the leader tab, other tabs will re-elect a leader.
 
 When Logux client opens WebSocket connection, it sends a user ID and user token to the server.
 
@@ -155,7 +155,7 @@ log.add(
 
 <details open><summary>Redux client</summary>
 
-In the most popular case, Logux client use [Redux-style reducers] to **reduce list of action to the state**. Reducer is a pure function, which immutable change the state according to this new action:
+In the most popular case, Logux client uses [Redux-style reducers] to **reduce list of action to the state**. Reducer is a pure function, which immutably changes the state according to this new action:
 
 ```js
 function usersReducers (state = { }, action) {
@@ -172,7 +172,7 @@ function usersReducers (state = { }, action) {
 </details>
 <details><summary>Vuex client</summary>
 
-Logux Vuex client use [Vuex mutations] to **reduce list of action to the state**. Mutation is the only way to change state.
+Logux Vuex client uses [Vuex mutations] to **reduce list of action to the state**. Mutation is the only way to change state.
 
 ```js
 const store = createStore({
@@ -189,7 +189,7 @@ const store = createStore({
 
 </details>
 
-If the user changed their name in the form, the client does not need to show loader on the Save button. The client creates action and applies this action to the state **immediately**.
+If the user changed her name in the form, the client does not need to show loader on the Save button. The client creates action and applies this action to the state **immediately**.
 
 In the background, the client will send this new action to the server by WebSocket. While the client is waiting for the answer from the server, it is showing small *“changes were not saved yet”* warning.
 
@@ -199,7 +199,7 @@ When the server receives new action it does three things:
 2. Check user **access** to do this action.
 3. **Re-send** this action to all clients subscribed to `meta.channels`.
 4. Apply this action to **database**.
-5. **Clean** server log from this action since server does not need it anymore. When other clients will connect to the server, server will create a new action for them as described in “Subscriptions” section.
+5. **Clean** this action from server log since server does not need it anymore. When other clients will connect to the server, server will create a new action for them as described in “Subscriptions” section.
 
 ```js
 server.type('user/name', {
@@ -252,9 +252,9 @@ Optimistic UI is great for UX. Some actions (like payments) require loader. Logu
 
 ## Offline
 
-Logux clients send pings messages to WebSocket to detect losing Internet and show *“you are offline”* warning.
+Logux clients send ping messages to WebSocket to detect losing Internet and show *“you are offline”* warning.
 
-Offline is a normal mode for Logux. The user can work with data and create an action to change the data. Unsent action be kept in the log and user will see *“changes were not saved yet”* warning.
+Offline is a normal mode for Logux. The user can work with data and create actions to change the data. Unsent actions will be kept in the log and user will see *“changes were not saved yet”* warning.
 
 When user get Internet back, Logux will reconnect to the server, send all actions and receive all data updates.
 
@@ -263,7 +263,7 @@ When user get Internet back, Logux will reconnect to the server, send all action
 
 When you are working with any offline-first system, you should ask how it deals with edit conflicts. During offline two users can change the same document. Even if only one user works with the document, this user can change the document from different devices.
 
-For instance, *user A* changed the title and publication date for the document. *User B* a few minutes later changed document’s title and tags. Because of offline, *user A* could synchronize their actions later, than *user B*.
+For instance, *user A* changed the title and publication date for the document. *User B* a few minutes later changed document’s title and tags. Because of offline, *user A* could synchronize his actions later, than *user B*.
 
 To merge edit conflicts in Logux:
 
@@ -280,12 +280,12 @@ Logux client and server use different approaches to work with action’s order.
 
 * Server stores **last edit time** for each document property. When it received
   action from *user B*, server applies their changes to the database
-  (because last change of the document title was a few weeks ago). The server will receive action from *user A*. Because *A’s* action time is smaller,
+  (because last change of the document title was a few weeks ago). The server will receive action from *user A*. Because *A’s* action time is earlier,
   than latest title changes (*B’s* action time), the server will ignore
   *A’s* action.
 * Logux client has **time traveling**. When *user B* received *A’s* action
-  from (server re-sent it), the client will revert all recent action,
-  including their title changes. Then it will apply *A’s* action and re-apply
+  from (server re-sent it), the client will revert all recent actions,
+  including title changes. Then it will apply *A’s* action and re-apply
   all reverted actions back. As a result, *A’s* action was placed in the correct moment of history. So, *A’s* title changes were overridden by later
   *B’s* action.
 
